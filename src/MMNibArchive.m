@@ -795,6 +795,7 @@ static NSData *serializeNibArchiveClassNameList(NSArray *classNames) {
 @implementation MMNibArchive
 @synthesize data = m_data;
 @synthesize keys = m_keys;
+@synthesize keyStrings = m_keyStrings;
 @synthesize values = m_values;
 @synthesize objects = m_objects;
 @synthesize classNames = m_classNames;
@@ -1003,6 +1004,18 @@ static NSData *serializeNibArchiveClassNameList(NSArray *classNames) {
 	return m_keys;
 }
 
+- (NSArray *)keyStrings {
+	if (!m_keyStrings) {
+		NSMutableArray *a = [NSMutableArray arrayWithCapacity:self.keys.count];
+		for (NSData *data in self.keys) {
+			NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+			[a addObject:s];
+		}
+		m_keyStrings = a;
+	}
+	return m_keyStrings;
+}
+
 - (NSArray *)values {
 	NSData * const data = m_data;
 	if (!m_values && data) {
@@ -1108,7 +1121,7 @@ static NSData *serializeNibArchiveClassNameList(NSArray *classNames) {
 
 - (NSString *)objectDescription:(MMNibArchiveObject *)object depth:(int)depth
 {
-	if (depth > 10) return [NSString stringWithFormat:@"*(object #%lu)", [self.objects indexOfObject:object]];
+	if (depth > 2) return [NSString stringWithFormat:@"*(object #%lu <%@>)", [self.objects indexOfObject:object], [self.classNames[object.classNameIndex] nameString]];
 	NSMutableString *desc = [NSMutableString string];
 	for (int j = 0; j < depth ; ++j) [desc appendString:@"  "];
 	[desc appendFormat:@"%@:\n", [self.classNames[object.classNameIndex] nameString]];
@@ -1133,6 +1146,10 @@ static NSData *serializeNibArchiveClassNameList(NSArray *classNames) {
 - (NSString *)debugDescription
 {
 	NSMutableString *debugDescription = [NSMutableString string];
+	[debugDescription appendString:@"classNames:\n"];
+	for (MMNibArchiveClassName *className in self.classNames) {
+		[debugDescription appendFormat:@"  - %@\n", className.nameString];
+	}
 	for (MMNibArchiveObject *object in self.objects) {
 		[debugDescription appendString:[self objectDescription:object depth:0]];
 	}

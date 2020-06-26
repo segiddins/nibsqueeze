@@ -22,6 +22,8 @@
 #import "MMNibArchiveValue.h"
 
 
+@class MMNibArchiveValue;
+
 extern NSString * const MMNibArchiveErrorDomain;
 
 extern BOOL MMNibArchiveReadVarLengthInteger(const uint8_t * const bytes, const size_t numberOfBytes, size_t *offsetPtr, size_t *resultPtr);
@@ -39,6 +41,11 @@ extern BOOL MMNibArchiveWriteVarLengthInteger(uint8_t * const bytes, const size_
  The key array used to decode objects. Contains NSData objects.
  */
 @property (nonatomic, strong, readonly) NSArray *keys;
+
+/**
+ The key array used to decode objects. Contains NSString objects.
+ */
+@property (nonatomic, strong, readonly) NSArray *keyStrings;
 
 /**
  The value array used to decode objects. Contains MMNibArchiveValue objects.

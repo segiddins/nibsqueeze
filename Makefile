@@ -15,6 +15,7 @@ HEADERS = src/DeduplicateConstantObjects.h \
           src/MMNibArchiveObject.h \
           src/MMNibArchiveTypes.h \
           src/MMNibArchiveValue.h \
+          src/SortNibContents.h \
           src/StripUnusedClassNames.h \
           src/StripUnusedValues.h
 
@@ -27,6 +28,7 @@ SOURCES = src/DeduplicateConstantObjects.m \
           src/MMNibArchiveClassName.m \
           src/MMNibArchiveObject.m \
           src/MMNibArchiveValue.m \
+          src/SortNibContents.m \
           src/StripUnusedClassNames.m \
           src/StripUnusedValues.m
 
