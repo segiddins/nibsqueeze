@@ -610,7 +610,9 @@ int main(int argc, char **argv) {
 							NSError *nibParseError = nil;
 							MMNibArchive *archive = MM_autorelease([[MMNibArchive alloc] initWithData:container.originalData error:&nibParseError]);
 							if (archive) {
-								archive = smallerNibArchiveForOptions(archive, settings);
+								// archive = smallerNibArchiveForOptions(archive, settings);
+								(void)settings;
+								[archive.debugDescription writeToFile:[nibPath stringByAppendingString:@".txt"] atomically:NO encoding:NSUTF8StringEncoding error:nil];
 								NSData *archiveData = archive.data;
 
 								if ([archiveData length] < [nibData length]) {

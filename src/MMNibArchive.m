@@ -1048,13 +1048,103 @@ static NSData *serializeNibArchiveClassNameList(NSArray *classNames) {
 	return m_classNames;
 }
 
+- (NSString *)formattedArchiveValue:(MMNibArchiveValue *)value depth:(int)depth fromKey:(NSString *)keyName
+{
+	switch(value.type) {
+	case kMMNibArchiveValueTypeUInt8: {
+		uint8_t decodedInteger;
+		[value.data getBytes:&decodedInteger length:sizeof(decodedInteger)];
+		return @(decodedInteger).description;
+	}
+	case kMMNibArchiveValueTypeUInt16: {
+		uint16_t decodedInteger;
+		[value.data getBytes:&decodedInteger length:sizeof(decodedInteger)];
+		return @(decodedInteger).description;
+	}
+	case kMMNibArchiveValueTypeUInt32: {
+		uint32_t decodedInteger;
+		[value.data getBytes:&decodedInteger length:sizeof(decodedInteger)];
+		return @(decodedInteger).description;
+	}
+	case kMMNibArchiveValueTypeUInt64: {
+		uint64_t decodedInteger;
+		[value.data getBytes:&decodedInteger length:sizeof(decodedInteger)];
+		return @(decodedInteger).description;
+	}
+	case kMMNibArchiveValueTypeTrue: {
+		return @"YES";
+	}
+	case kMMNibArchiveValueTypeFalse: {
+		return @"NO";
+	}
+	case kMMNibArchiveValueTypeFloat: {
+		float decodedInteger;
+		[value.data getBytes:&decodedInteger length:sizeof(decodedInteger)];
+		return @(decodedInteger).description;
+	}
+	case kMMNibArchiveValueTypeDouble: {
+		double decodedInteger;
+		[value.data getBytes:&decodedInteger length:sizeof(decodedInteger)];
+		return @(decodedInteger).description;
+	}
+	case kMMNibArchiveValueTypeNil: {
+		return @"NULL";
+	}
+	case kMMNibArchiveValueTypeData: {
+		if ([keyName isEqualToString:@"NS.bytes"]) {
+			NSString *string = [[NSString alloc] initWithData: value.dataValue encoding: NSUTF8StringEncoding];
+			if (string) {
+				if (string.length) return string.debugDescription; else return @"\"\"";
+			}
+		}
+		return value.dataValue.description;
+	}
+	case kMMNibArchiveValueTypeObjectReference: {
+		return [self objectDescription:self.objects[value.objectReference] depth:depth+1];
+	}
+	}
+	return @"PAST THE END";
+}
+
+- (NSString *)objectDescription:(MMNibArchiveObject *)object depth:(int)depth
+{
+	if (depth > 10) return [NSString stringWithFormat:@"*(object #%lu)", [self.objects indexOfObject:object]];
+	NSMutableString *desc = [NSMutableString string];
+	for (int j = 0; j < depth ; ++j) [desc appendString:@"  "];
+	[desc appendFormat:@"%@:\n", [self.classNames[object.classNameIndex] nameString]];
+	for (NSUInteger i = object.valuesRange.location; i < NSMaxRange(object.valuesRange); ++i){
+		MMNibArchiveValue *value = self.values[i];
+		NSData *key = self.keys[value.keyIndex];
+		NSString *keyName = [[NSString alloc] initWithData:key encoding:NSUTF8StringEncoding];
+		for (int j = 0; j < depth ; ++j) [desc appendString:@"  "];
+		[desc appendFormat: @"  %@:", keyName];
+
+		NSString *valueDesc = [self formattedArchiveValue:value depth:depth+1 fromKey:keyName];
+
+		if ([valueDesc containsString:@"\n"]) {
+			[desc appendFormat:@"\n%@", valueDesc];
+		} else {
+			[desc appendFormat:@" %@\n", valueDesc];
+		}
+	}
+	return desc;
+}
+
+- (NSString *)debugDescription
+{
+	NSMutableString *debugDescription = [NSMutableString string];
+	for (MMNibArchiveObject *object in self.objects) {
+		[debugDescription appendString:[self objectDescription:object depth:0]];
+	}
+	return debugDescription;
+}
+
 - (NSData *)data {
 	NSArray *objects = m_objects;
 	NSArray *keys = m_keys;
 	NSArray *values = m_values;
 	NSArray *classNames = m_classNames;
 	if (!m_data && objects && keys && values && classNames) {
-
 		NSData *objectsData = serializeNibArchiveObjectList(objects);
 		NSData *keysData = serializeNibArchiveKeyList(keys);
 		NSData *valuesData = serializeNibArchiveValuesList(values);
