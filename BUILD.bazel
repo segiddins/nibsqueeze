@@ -1,0 +1,25 @@
+objc_library(
+    name = "nibsqueeze_lib",
+    srcs = glob(["src/*.h"]),
+    copts = [
+        "-Werror",
+        "-Wall",
+        "-Weverything",
+        "-pedantic",
+        "-Wno-direct-ivar-access",
+        "-Wno-padded",
+        "-Wno-cstring-format-directive",
+        "-Wno-objc-messaging-id",
+        "-Wno-format-pedantic",
+        "-Wno-format-pedantic",
+        "-Wno-implicit-int-conversion",
+    ],
+    non_arc_srcs = glob(["src/*.m"]),
+)
+
+# https://docs.bazel.build/versions/master/be/c-cpp.html#cc_binary
+cc_binary(
+    name = "nibsqueeze",
+    copts = [],
+    deps = [":nibsqueeze_lib"],
+)
